@@ -1,29 +1,11 @@
 import requests
 import shutil
-# import pickle
 
 class SonaWue:
     def __init__(self, username:str, password:str):
         self._host = "https://psywue.sona-systems.com"
-        # self._cookies = None
-        # self._token = self._read_token()
         self._token = self._authenticate(username,password)
         print("Initialized SonaWue with token "+ self._token)
-
-    # def _read_token(self):
-    #     try:
-    #         f = open('token.pckl', 'rb')
-    #         token = pickle.load(f)
-    #         f.close()
-    #         return token
-    #     except IOError:
-    #         return 
-
-    # def _set_token(self, token):
-    #     self._token = token
-    #     f = open('token.pckl', 'wb')
-    #     pickle.dump(self._token, f)
-    #     f.close()
 
     def _request_invalidator(self, r):
         if r.status_code != 200 or r.json()["ErrorCode"] != 0:
@@ -47,9 +29,8 @@ class SonaWue:
     def _login_page(self):
         #TODO export cause unused
         url = self._host + "/services/SonaMobileAPI.svc/GetLoginPageInfo"
-        r = requests.post(url)#, cookies=self._cookies)
+        r = requests.post(url)
         r = self._request_invalidator(r)
-        # self._cookies = r.cookies
         # print(r.text)
         return r
 
@@ -57,7 +38,7 @@ class SonaWue:
     def _custom_icon(self):
         url = self._host + "/custom/customlogo.png"
 
-        r = requests.get(url,stream=True) #cookies=self._cookies, 
+        r = requests.get(url,stream=True)
         print(r.status_code)
         with open('logo.png', 'wb') as out_file:
             shutil.copyfileobj(r.raw, out_file)
@@ -76,13 +57,12 @@ class SonaWue:
         }
 
         print("Authenticasting")
-        r = requests.post(url, json=body)#, cookies=self._cookies)
+        r = requests.post(url, json=body)
 
         #TODO own authorize exception
         token = self._request_invalidator(r)
 
         # print(r.text)
-        # self._set_token(token)
         return token
 
     def _my_schedule(self):
