@@ -1,10 +1,17 @@
 import requests
 import shutil
+from pprint import pprint
+
+#TODO package with top level here for import
+from schemas.Schedule import ScheduleSchema
+from schemas.MainMenuInfo import MainMenuInfoSchema
+from schemas.StudyPage import StudyPageSchema
+from schemas.StudyInfo import StudyInfoSchema
 
 class SonaWue:
-    def __init__(self, username:str, password:str):
+    def __init__(self, token:str=None, username:str = None, password:str = None):
         self._host = "https://psywue.sona-systems.com"
-        self._token = self._authenticate(username,password)
+        self._token = token if token else self._authenticate(username,password)
         print("Initialized SonaWue with token "+ self._token)
 
     def _request_invalidator(self, r):
@@ -23,6 +30,7 @@ class SonaWue:
         r_json = r.json()
 
         print(r.text)
+        #TODO schema
         #TODO better way to invalidate errored
         r = self._request_invalidator(r)
 
@@ -31,11 +39,12 @@ class SonaWue:
         url = self._host + "/services/SonaMobileAPI.svc/GetLoginPageInfo"
         r = requests.post(url)
         r = self._request_invalidator(r)
+        #TODO schema
         # print(r.text)
         return r
 
 
-    def _custom_icon(self):
+    def custom_icon(self):
         url = self._host + "/custom/customlogo.png"
 
         r = requests.get(url,stream=True)
@@ -65,7 +74,9 @@ class SonaWue:
         # print(r.text)
         return token
 
-    def _my_schedule(self):
+    #TODO nextLogin Page request but no useful info in capture
+
+    def my_schedule(self):
         url = self._host + "/services/SonaMobileAPI.svc/GetMyScheduleInfo"
 
         body = {
@@ -75,19 +86,14 @@ class SonaWue:
         r = requests.post(url, json=body)
         result = self._request_invalidator(r)
 
-        resultDict = {
-            "course_credits": result["course_credits"],
-            "display_course_credits": result["display_course_credits"],
-            "display_overall_credits": result["display_overall_credits"],
-            "overall_credits_earned": float(result["overall_credits_earned"].split(":")[1].strip()),
-            "overall_credits_needed": float(result["overall_credits_needed"].split(":")[1].strip()),
-            "study_signups": result["study_signups"],
-            "text_progress_display": result["text_progress_display"]
-        }
+        schema = ScheduleSchema()
+        resultObj = schema.load(result)
 
-        print(resultDict)
+        print(resultObj["display_overall_credits"])
+        print(resultObj)
 
-    def _main_menu_info(self):
+
+    def main_menu_info(self):
         url = self._host + "/services/SonaMobileAPI.svc/GetMainMenuInfo"
 
         body = {
@@ -97,28 +103,39 @@ class SonaWue:
         r = requests.post(url, json=body)
         result = self._request_invalidator(r)
 
-        resultDict = {
-            "announcement_display": result["announcement_display"],
-            "announcement_name": result["announcement_name"],
-            "announcement_text": result["announcement_text"],
-            "credits_display": result["credits_display"],
-            "credits_earned": result["credits_earned"],
-            "credits_name": result["credits_name"],
-            "credits_needed": result["credits_needed"],
-            "credits_pending": result["credits_pending"],
-            "email_questions_text": result["email_questions_text"],
-            "faq_enabled": result["faq_enabled"],
-            "logo_url": result["logo_url"],
-            "signups": result["signups"],
-            "signups_display": result["signups_display"],
-            "signups_name": result["signups_name"],
-            "site_name": result["site_name"],
-            "username_name": result["username_name"],
-            "username_text": result["username_text"],
-            "username_type": result["username_type"]
+        schema = MainMenuInfoSchema()
+        resultObj = schema.load(result)
+
+        print(resultObj)
+
+
+    def study_page_info(self) -> StudyPageSchema:
+        url = self._host + "/services/SonaMobileAPI.svc/GetStudiesPageInfo"
+
+        body = {
+            "p_sessionToken": self._token
         }
 
-        print(resultDict)
+        r = requests.post(url, json=body)
+        result = self._request_invalidator(r)
 
-    
+        schema = StudyPageSchema()
+        resultObj = schema.load(result)
 
+        print(resultObj)
+
+    def study_info(self, experiment_id:int) -> StudyInfoSchema:
+        url = self._host + "/services/SonaMobileAPI.svc/GetStudyInfo"
+
+        body = {
+            "p_sessionToken": self._token,
+            "p_experiment_id": experiment_id
+        }
+
+        r = requests.post(url, json=body)
+        result = self._request_invalidator(r)
+
+        schema = StudyInfoSchema()
+        resultObj = schema.load(result)
+
+        print(resultObj)
