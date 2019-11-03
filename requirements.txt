@@ -1,3 +1,9 @@
 flask-smorest==0.18.2
 marshmallow==3.2.1
 requests==2.22.0
+
+
+# development dependancies for vscode
+# virtualenv
+rope
+pylint

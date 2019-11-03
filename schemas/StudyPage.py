@@ -12,6 +12,8 @@ class StudySchema(Schema):
 
 
 class StudyPageSchema(Schema):
-    study_signups = fields.List(fields.Str())
+    # study_signups = fields.List(fields.Str())
+    #TODO what with this
+    # study_signups = fields.Nested(StudySchema(many=True))
     application_text = fields.Str()
     studies = fields.Nested(StudySchema(many=True))

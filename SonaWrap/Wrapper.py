@@ -8,31 +8,36 @@ from schemas.MainMenuInfo import MainMenuInfoSchema
 from schemas.StudyPage import StudyPageSchema
 from schemas.StudyInfo import StudyInfoSchema
 
-class SonaWue:
-    def __init__(self, token:str=None, username:str = None, password:str = None):
-        self._host = "https://psywue.sona-systems.com"
+from SonaWrap.SonaApiError import SonaApiError
+
+class SonaWrap:
+    def __init__(self, token:str=None, username:str = None, password:str = None, base_host:str="https://psywue.sona-systems.com"):
+        self._host = base_host
         self._token = token if token else self._authenticate(username,password)
-        print("Initialized SonaWue with token "+ self._token)
+        print("Initialized SonaWrap with token "+ self._token)
+
+    def get_token(self):
+        return self._token
 
     def _request_invalidator(self, r):
         if r.status_code != 200 or r.json()["ErrorCode"] != 0:
             print(r.json()["Errors"])
             print(r.json())
             #TODO own exception here
-            raise Exception("Request to SoNA api failed")
+            raise SonaApiError("Request to SoNA api failed", r.json())
         return r.json()["Result"]
-
 
     def test_connection(self):
         #TODO export cause unused
         url = self._host + "/services/SonaMobileAPI.svc/TestConnection"
         r = requests.post(url)
-        r_json = r.json()
+        # r_json = r.json()
 
         print(r.text)
         #TODO schema
         #TODO better way to invalidate errored
         r = self._request_invalidator(r)
+        #TODO return type
 
     def _login_page(self):
         #TODO export cause unused
@@ -42,6 +47,7 @@ class SonaWue:
         #TODO schema
         # print(r.text)
         return r
+        #TODO return type
 
 
     def custom_icon(self):
@@ -52,8 +58,9 @@ class SonaWue:
         with open('logo.png', 'wb') as out_file:
             shutil.copyfileobj(r.raw, out_file)
         del r
+        #TODO return image here as object instead of saving at all
 
-    def _authenticate(self, username:str, password:str):
+    def _authenticate(self, username:str, password:str) -> str: #TODO return type token given here
         # r_login_page = self._login_page()
 
         url = self._host + "/services/SonaMobileAPI.svc/Authenticate"
@@ -91,6 +98,7 @@ class SonaWue:
 
         print(resultObj["display_overall_credits"])
         print(resultObj)
+        return resultObj
 
 
     def main_menu_info(self):
@@ -107,6 +115,7 @@ class SonaWue:
         resultObj = schema.load(result)
 
         print(resultObj)
+        return resultObj
 
 
     def study_page_info(self) -> StudyPageSchema:
@@ -123,6 +132,7 @@ class SonaWue:
         resultObj = schema.load(result)
 
         print(resultObj)
+        return resultObj
 
     def study_info(self, experiment_id:int) -> StudyInfoSchema:
         url = self._host + "/services/SonaMobileAPI.svc/GetStudyInfo"
@@ -139,3 +149,4 @@ class SonaWue:
         resultObj = schema.load(result)
 
         print(resultObj)
+        return resultObj
