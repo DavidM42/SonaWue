@@ -1,0 +1,16 @@
+{
+    "base": {
+        "aws_region": "eu-central-1",
+        "profile_name": "default",
+        "project_name": "sonaapi",
+        "s3_bucket": "zappa-uni-api-sona",
+        "runtime": "python3.7"
+    },
+    "dev": {
+        "extends": "base",
+        "app_function": "app.app",
+        "certificate_arn": "arn:aws:acm:us-east-1:XXXXXXXXX:certificate/XXXXXXXXXXXXX",
+        "domain": "sona.exampleDomain.com",
+        "route53_enabled": false
+    }
+}

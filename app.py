@@ -24,8 +24,12 @@ api = Api(app)
 
 
 #get blueprints and register them
-from SonaApp.routes.auth import authBlp
-from SonaApp.routes.studyPage import spBlp
+from appRoutes.auth import authBlp
+from appRoutes.studyPage import spBlp
 
 api.register_blueprint(authBlp)
 api.register_blueprint(spBlp)
+
+# local debug server starter
+if __name__ == "__main__":
+    app.run(debug=True)
