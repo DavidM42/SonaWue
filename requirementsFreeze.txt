@@ -21,6 +21,6 @@ rope==0.14.0
 six==1.12.0
 typed-ast==1.4.0
 urllib3==1.25.6
-webargs==5.5.2
+webargs==5.5.3
 Werkzeug==0.16.0
 wrapt==1.11.2
